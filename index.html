@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b45">
+  <title>Vérification de carte grise — Démonstration</title>
+  <style>
+    :root {
+      --green: #176b45;
+      --green-dark: #104b32;
+      --yellow: #f5cf35;
+      --blue: #2776bd;
+      --ink: #17231d;
+      --muted: #637168;
+      --line: #e1e9e3;
+      --surface: #f4f8f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--surface);
+      line-height: 1.5;
+    }
+    .topbar {
+      height: 8px;
+      background: linear-gradient(to bottom, var(--green) 0 33.33%, var(--yellow) 33.33% 66.66%, var(--blue) 66.66%);
+    }
+    header {
+      background: white;
+      border-bottom: 1px solid var(--line);
+      padding: 22px 16px;
+    }
+    .header-inner, main, footer { max-width: 900px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .flag {
+      width: 50px; height: 38px; border-radius: 5px; overflow: hidden;
+      border: 1px solid #d9dfda; flex: 0 0 auto;
+      display: flex; flex-direction: column;
+    }
+    .flag span { flex: 1; }
+    .flag span:nth-child(1) { background: var(--green); }
+    .flag span:nth-child(2) { background: var(--yellow); }
+    .flag span:nth-child(3) { background: var(--blue); }
+    .eyebrow { color: var(--green); text-transform: uppercase; font-size: .72rem; font-weight: 800; letter-spacing: .09em; }
+    h1 { font-size: clamp(1.2rem, 4vw, 1.75rem); line-height: 1.2; margin: 3px 0 0; }
+    .subhead { color: var(--muted); margin-top: 5px; font-size: .92rem; }
+    main { padding: 22px 14px 34px; }
+    .demo-alert {
+      display: flex; align-items: flex-start; gap: 11px;
+      padding: 13px 15px; background: #fff8dc; border: 1px solid #f0df9b;
+      border-radius: 12px; margin-bottom: 17px; color: #624c08; font-size: .9rem;
+    }
+    .demo-alert strong { display: block; margin-bottom: 2px; }
+    .card {
+      background: white; border: 1px solid var(--line); border-radius: 18px;
+      overflow: hidden; box-shadow: 0 8px 30px rgba(20, 57, 37, .06);
+    }
+    .card-head {
+      padding: 20px; background: linear-gradient(120deg, var(--green-dark), var(--green));
+      color: white; display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    }
+    .card-head h2 { font-size: 1.15rem; margin: 0; }
+    .card-head p { margin: 5px 0 0; color: #dcefe4; font-size: .88rem; }
+    .status {
+      flex: 0 0 auto; border-radius: 999px; padding: 7px 10px;
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+      font-size: .75rem; font-weight: 800; white-space: nowrap;
+    }
+    .content { padding: 20px; }
+    .plate-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding-bottom: 17px; border-bottom: 1px solid var(--line); margin-bottom: 18px;
+    }
+    .plate-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .plate {
+      display: inline-block; border: 2px solid #202720; border-radius: 7px;
+      background: #fff; color: #111; padding: 7px 13px; font-size: 1.35rem;
+      font-weight: 850; letter-spacing: .08em; margin-top: 5px;
+    }
+    .pill { font-size: .76rem; font-weight: 700; color: var(--green-dark); background: #e8f5ed; padding: 7px 10px; border-radius: 8px; }
+    h3 { font-size: .95rem; margin: 0 0 13px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+    .field { min-width: 0; }
+    .field .label { display: block; color: var(--muted); font-size: .77rem; margin-bottom: 3px; }
+    .field .value { display: block; font-weight: 700; overflow-wrap: anywhere; }
+    .section { padding: 18px 0; border-bottom: 1px solid var(--line); }
+    .section:last-child { border-bottom: 0; padding-bottom: 0; }
+    .reference { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9rem; }
+    .verification {
+      margin-top: 17px; padding: 15px; border: 1px solid #dce9df; border-radius: 12px;
+      background: #f7fbf8; display: flex; gap: 11px; align-items: flex-start;
+    }
+    .check {
+      width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+      background: #dff2e5; color: var(--green-dark); font-weight: 900; flex: 0 0 auto;
+    }
+    .verification strong { display: block; font-size: .93rem; }
+    .verification p { margin: 3px 0 0; color: var(--muted); font-size: .84rem; }
+    .footnote { color: var(--muted); font-size: .8rem; margin: 14px 2px 0; }
+    footer { padding: 0 16px 28px; text-align: center; color: var(--muted); font-size: .78rem; }
+    @media (max-width: 520px) {
+      header { padding: 18px 14px; }
+      .brand { align-items: flex-start; }
+      .flag { width: 43px; height: 33px; }
+      .card-head { align-items: flex-start; flex-direction: column; }
+      .status { white-space: normal; }
+      .content { padding: 16px; }
+      .grid { grid-template-columns: 1fr; gap: 12px; }
+      .plate-row { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar" aria-hidden="true"></div>
+  <header>
+    <div class="header-inner brand">
+      <div class="flag" role="img" aria-label="Drapeau du Gabon"><span></span><span></span><span></span></div>
+      <div>
+        <div class="eyebrow">République gabonaise</div>
+        <h1>Vérification d'un document véhicule</h1>
+        <div class="subhead">Maquette de démonstration • Carte grise</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="demo-alert" role="note">
+      <span aria-hidden="true">ⓘ</span>
+      <div>
+        <strong>Prototype de démonstration — données fictives</strong>
+        Cette page illustre le parcours après le scan d'un QR code. Elle n'est pas reliée à un registre officiel et ne certifie pas l'authenticité d'un document.
+      </div>
+    </div>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h2>Carte grise — informations du véhicule</h2>
+          <p>Informations d'exemple affichées après lecture du QR code</p>
+        </div>
+        <span class="status">MODE DÉMONSTRATION</span>
+      </div>
+
+      <div class="content">
+        <div class="plate-row">
+          <div>
+            <div class="plate-label">Numéro d'immatriculation</div>
+            <div class="plate">AA-123-GA</div>
+          </div>
+          <span class="pill">Dossier exemple</span>
+        </div>
+
+        <section class="section">
+          <h3>Identification du titulaire</h3>
+          <div class="grid">
+            <div class="field"><span class="label">Nom et prénoms</span><span class="value">MARCELIN EXEMPLE</span></div>
+            <div class="field"><span class="label">Adresse</span><span class="value">AKANDA (exemple)</span></div>
+            <div class="field"><span class="label">Profession</span><span class="value">Profession non renseignée</span></div>
+            <div class="field"><span class="label">Genre</span><span class="value">—</span></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Caractéristiques du véhicule</h3>
+          <div class="grid">
+            <div class="field"><span class="label">Marque</span><span class="value">TOYOTA</span></div>
+            <div class="field"><span class="label">Type et couleur</span><span class="value">ROUGE</span></div>
+            <div class="field"><span class="label">Numéro de châssis</span><span class="value reference">DEMO-CHASSIS-001</span></div>
+            <div class="field"><span class="label">Année de première mise en circulation</span><span class="value">2020</span></div>
+            <div class="field"><span class="label">Source d'énergie</span><span class="value">ESSENCE</span></div>
+            <div class="field"><span class="label">Places assises</span><span class="value">5</span></div>
+            <div class="field"><span class="label">Puissance administrative</span><span class="value">—</span></div>
+            <div class="field"><span class="label">Poids à vide</span><span class="value">—</span></div>
+            <div class="field"><span class="label">Charge utile</span><span class="value">—</span></div>
+            <div class="field"><span class="label">Poids total autorisé en charge</span><span class="value">—</span></div>
+            <div class="field"><span class="label">Cylindrée du moteur</span><span class="value">—</span></div>
+            <div class="field"><span class="label">Précédent numéro d'immatriculation</span><span class="value">—</span></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Références du document</h3>
+          <div class="grid">
+            <div class="field"><span class="label">Référence de démonstration</span><span class="value reference">DEMO-2026-001</span></div>
+            <div class="field"><span class="label">Date de délivrance (exemple)</span><span class="value">20/10/2026</span></div>
+          </div>
+        </section>
+
+        <div class="verification">
+          <div class="check" aria-hidden="true">i</div>
+          <div>
+            <strong>Résultat : démonstration uniquement</strong>
+            <p>Aucune vérification auprès d'une autorité n'a été effectuée. Dans une version opérationnelle, ce résultat devra provenir du système officiel de l'administration.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+    <p class="footnote">Les données de cette maquette sont fictives. Ne pas utiliser comme justificatif administratif ni comme preuve de validité d'une carte grise.</p>
+  </main>
+
+  <footer>Prototype d'interface • Rengus Digital — à valider avant toute présentation officielle</footer>
+</body>
+</html>
